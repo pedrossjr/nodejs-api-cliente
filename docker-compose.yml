@@ -1,0 +1,13 @@
+# Define os serviços que serão executados
+services:
+  # Nome do serviço
+  clientes-api:
+    # Especifica o diretório onde está o Dockerfile para construir a imagem
+    build: .
+    # Nome do container que será criado
+    container_name: clientes-api
+    # Mapeamento de portas, onde a porta 3000 do host será mapeada para a porta 3000 do container
+    ports:
+      - "3000:3000"
+    # Configura o container para reiniciar automaticamente em caso de falha ou quando o Docker for reiniciado
+    restart: always
