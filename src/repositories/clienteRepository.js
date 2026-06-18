@@ -1,34 +1,29 @@
-const repository = require('../repositories/clienteRepository');
+const Cliente = require('../models/cliente');
 
 class ClienteRepository {
-
-    findAll() {
-        return repository.findAll();
+    async findAll() {
+        return await Cliente.findAll();
     }
 
-    findByCodigo(codigo) {
-        return clientes.find(
-            c => c.codigo == codigo
-        );
+    async findByCodigo(codigo) {
+        return await Cliente.findByPk(codigo);
     }
 
-    save(cliente) {
-
-        clientes.push(cliente);
-
-        return cliente;
+    async save(cliente) {
+        return await Cliente.create(cliente);
     }
 
-    delete(codigo) {
+    async update(cliente) {
+        return await cliente.save();
+    }
 
-        const index =
-            clientes.findIndex(
-                c => c.codigo == codigo
-            );
+    async delete(codigo) {
+        const cliente = await this.findByCodigo(codigo);
 
-        clientes.splice(index, 1);
+        if(cliente) {
+            await cliente.destroy();
+        }
     }
 }
 
-module.exports =
-new ClienteRepository();
+module.exports = new ClienteRepository();

@@ -1,13 +1,73 @@
 # Define os serviços que serão executados
 services:
-  # Nome do serviço
-  clientes-api:
-    # Especifica o diretório onde está o Dockerfile para construir a imagem
+  # Serviço do banco de dados PostgreSQL
+  postgres:
+    # Use a versão 17 do PostgreSQL
+    image: postgres:17
+
+    healthcheck: # Define um healthcheck para verificar se o banco de dados está pronto
+      test: ["CMD-SHELL", "pg_isready -U postgres"] # Comando para verificar se o PostgreSQL está pronto
+      interval: 5s # Intervalo entre as verificações de saúde
+      timeout: 5s # Tempo limite para a verificação de saúde
+      retries: 10 # Número de tentativas antes de considerar o serviço como não saudável
+
+    # Nome do container para o banco de dados
+    container_name: postgres-clientes
+
+    # Variáveis de ambiente para configurar o banco de dados
+    environment:
+      # Nome do banco de dados a ser criado
+      POSTGRES_DB: clientesdb
+      # Nome do usuário do banco de dados
+      POSTGRES_USER: postgres
+      # Senha do usuário do banco de dados
+      POSTGRES_PASSWORD: postgres
+
+    # Mapeia a porta 5432 do container para a porta 5432 do host
+    ports:
+      - "5432:5432" # Mapeia a porta do PostgreSQL para acesso externo
+
+    # Define um volume para persistência dos dados do PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Serviço da API Node.js
+  api:
+    # Constrói a imagem a partir do Dockerfile na raiz do projeto
     build: .
-    # Nome do container que será criado
+
+    # Nome do container para a API
     container_name: clientes-api
-    # Mapeamento de portas, onde a porta 3000 do host será mapeada para a porta 3000 do container
+
+    # Garante que o serviço do PostgreSQL seja iniciado antes da API
+    depends_on:
+      postgres:
+        condition: service_healthy # Aguarda até que o serviço do PostgreSQL esteja saudável antes de iniciar a API
+
+    # Variáveis de ambiente para configurar a conexão com o banco de dados e a porta da API
+    environment:
+      # Host do banco de dados (nome do serviço definido acima)
+      DB_HOST: postgres
+
+      # Porta do banco de dados
+      DB_PORT: 5432
+
+      # Nome do banco de dados a ser usado pela API
+      DB_NAME: clientesdb
+
+      # Nome do usuário do banco de dados
+      DB_USER: postgres
+
+      # Senha do usuário do banco de dados
+      DB_PASSWORD: postgres
+
+      # Porta em que a API irá rodar
+      PORT: 3000
+
+    # Mapeia a porta 3000 do container para a porta 3000 do host
     ports:
       - "3000:3000"
-    # Configura o container para reiniciar automaticamente em caso de falha ou quando o Docker for reiniciado
-    restart: always
+
+# Define os volumes para persistência de dados
+volumes:
+  postgres_data:

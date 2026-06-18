@@ -1,89 +1,45 @@
-const clienteService =
-require('../services/clienteService');
+const clienteService = require('../services/clienteService');
 
 class ClienteController {
-
-    listar(req, res) {
-
-        return res.json(
-            clienteService.listar()
-        );
+    async listar(req, res) {
+        const cliente = await clienteService.listar();
+        return res.json(cliente);
     }
 
-    buscar(req, res) {
-
-        const cliente =
-            clienteService.buscarPorCodigo(
-                req.params.codigo
-            );
+    async buscar(req, res) {
+        const cliente = await clienteService.buscarPorCodigo(req.params.codigo);
 
         if (!cliente) {
-
-            return res.status(404).json({
-                mensagem:
-                "Cliente não encontrado"
-            });
+            return res.status(404).json({mensagem: "Cliente não encontrado"});
         }
 
         return res.json(cliente);
     }
 
-    cadastrar(req, res) {
-
+    async cadastrar(req, res) {
         try {
-
-            const cliente =
-                clienteService.cadastrar(
-                    req.body
-                );
-
-            return res.status(201).json(
-                cliente
-            );
-
+            const cliente = await clienteService.cadastrar(req.body);
+            return res.status(201).json(cliente);
         } catch (erro) {
-
-            return res.status(400).json({
-                erro: erro.message
-            });
+            return res.status(400).json({erro: erro.message});
         }
     }
 
-    atualizar(req, res) {
-
+    async atualizar(req, res) {
         try {
-
-            const cliente =
-                clienteService.atualizar(
-                    req.params.codigo,
-                    req.body
-                );
-
+            const cliente = await clienteService.atualizar(req.params.codigo, req.body);
             return res.json(cliente);
-
         } catch (erro) {
-
-            return res.status(404).json({
-                erro: erro.message
-            });
+            return res.status(404).json({erro: erro.message});
         }
     }
 
-    remover(req, res) {
-
+    async remover(req, res) {
         try {
-
-            clienteService.remover(
-                req.params.codigo
-            );
-
+            await clienteService.remover(req.params.codigo);
             return res.status(204).send();
-
         } catch (erro) {
-
-            return res.status(404).json({
-                erro: erro.message
-            });
+            return res.status(404).json({erro: erro.message});
         }
     }
 }

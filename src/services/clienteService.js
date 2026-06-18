@@ -1,73 +1,49 @@
-const Cliente = require('../models/cliente');
-
-let clientes = [];
+const repository = require('../repositories/clienteRepository');
 
 class ClienteService {
-
-    listar() {
-        return clientes;
+    async listar() {
+        return await repository.findAll();
     }
 
-    buscarPorCodigo(codigo) {
-        return clientes.find(c => c.codigo == codigo);
+    async buscarPorCodigo(codigo) {
+        return await repository.findByCodigo(codigo);
     }
 
-    cadastrar(dados) {
+    async cadastrar(dados) {
+        const existe = await repository.findByCodigo(dados.codigo);
 
-        const existe = clientes.find(
-            c => c.codigo == dados.codigo
-        );
-
-        if (existe) {
-            throw new Error(
-                "Cliente já cadastrado"
-            );
+        if(existe) {
+            throw new Error('Cliente já existe');
         }
 
-        const cliente = new Cliente(
-            dados.codigo,
-            dados.nome,
-            dados.telefone,
-            dados.email
+        return await repository.save(
+            dados
         );
-
-        clientes.push(cliente);
-
-        return cliente;
     }
 
-    atualizar(codigo, dados) {
+    async atualizar(codigo, dados) {
 
-        const cliente =
-            this.buscarPorCodigo(codigo);
+        const cliente = await repository.findByCodigo(codigo);
 
         if (!cliente) {
-            throw new Error(
-                "Cliente não encontrado"
-            );
+            throw new Error("Cliente não encontrado");
         }
 
         cliente.nome = dados.nome;
         cliente.telefone = dados.telefone;
         cliente.email = dados.email;
 
-        return cliente;
+        return await repository.update(cliente);
     }
 
-    remover(codigo) {
+    async remover(codigo) {
+        const cliente = await repository.findByCodigo(codigo);
 
-        const indice =
-            clientes.findIndex(
-                c => c.codigo == codigo
-            );
-
-        if (indice < 0) {
-            throw new Error(
-                "Cliente não encontrado"
-            );
+        if (!cliente) {
+            throw new Error("Cliente não encontrado");
         }
 
-        clientes.splice(indice, 1);
+        await repository.delete(codigo);
     }
 }
 
